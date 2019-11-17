@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<script src="js/jquery.min.js"></script>
+		<title></title>
+		<style>
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			body{
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				overflow: scroll;
+			}
+			.page{
+				overflow: hidden;
+				width: 1000px;
+				height: 800px;
+				border: 1px solid #999999;
+				position: relative;
+			}
+			.page>div{
+				width: 100px;
+				height: 100px;
+				position: absolute;
+				color: #FFFFFF;
+				text-align: center;
+				line-height: 100px;
+				font-size: 3em;
+				font-weight: bold;
+			}
+			.img1{
+				background: red;
+				left: 100px;
+				top: 100px;
+			}
+			.img2{
+				background: blue;
+				left: 200px;
+				top: 100px;
+			}
+			.img3{
+				left: 300px;
+				top: 100px;
+				background: black;
+			}
+			.img4{
+				top: 200px;
+				left: 100px;
+				background: #FFDEAD;
+			}
+			.img5{
+				top: 200px;
+				left: 200px;
+				background: #D15FEE;
+			}
+			.img6{
+				top: 200px;
+				left: 300px;
+				background: #CD1076;
+			}
+			.img7{
+				top: 300px;
+				left: 100px;
+				background: #AEEEEE;
+			}
+			.img8{
+				top: 300px;
+				left: 200px;
+				background: #8B4C39;
+			}
+			.img9{
+				top: 300px;
+				left: 300px;
+				background: #6A5ACD;
+			}
+			.img10{
+				top: 300px;
+				left: 400px;
+				background: #FFC125;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="page">
+			<div class="img1" data-index="1"></div>
+			<div class="img2" data-index="2"></div>
+			<div class="img3" data-index="3"></div>
+			<div class="img4" data-index="4"></div>
+			<div class="img5" data-index="5"></div>
+			<div class="img6" data-index="6"></div>
+			<div class="img7" data-index="7"></div>
+			<div class="img8" data-index="8"></div>
+			<div class="img9" data-index="9"></div>
+			<div class="img10" data-index="10"></div>
+		</div>
+	</body>
+</html>
+<script>
+	var isClick = false, x , y ,
+	sleft = 0 ,  //选中节点的初始left值
+	stop = 0,   //选中节点的初始top值
+	dom;  //当前选中的节点
+	$('.page div').on('mouseenter',function(e){
+		
+		var t = '.' + $(e.target).attr('class');
+		
+		//把当前
+		$(t).css('z-index','99').siblings('div').css('z-index','0');
+		
+		registerMove(t);  //注册该事件
+	})
+	
+	function registerMove(t){
+		$(t).on('mousedown',function(e){
+			x = e.clientX;
+			y = e.clientY;
+			sleft = $(t).css('left').replace('px','');
+			stop = $(t).css('top').replace('px','');
+			isClick = true;
+			dom = t;
+		});
+		
+		$(document).on('mousemove',function(e){  //给document绑定鼠标移动事件 是为了防止移动过快鼠标离开red后无法捕获鼠标移动事件
+			if(isClick){
+				var distanceX = x - e.clientX;
+				var distanceY = y - e.clientY;
+				$(dom).css({
+					left:sleft-distanceX + 'px',
+					top:stop-distanceY + 'px'
+				})
+			}
+		});
+		
+		$(document).on('mouseup',function(e){
+			
+			if(!dom || dom == ""){
+				
+				return false;
+				
+			}
+			
+			var endX = x - e.clientX;
+			
+			var endY = y - e.clientY;
+			
+			isClick = false;
+			
+			var eleft = $(dom).css('left').replace('px','');   //结束后的x坐标
+			
+			var etop = $(dom).css('top').replace('px','');     //结束后的y坐标
+			
+			var arr = [];   //获取选中的index
+			
+			for(var i = 0 ; i < $(dom).siblings().length ; i++){
+				
+				var a = judgeCollision($(dom),$(dom).siblings().eq(i));
+				
+				arr.push(a);
+				
+			}
+			
+			var coll = judgenum(arr);
+			
+			if(coll.len == 0){   //如果没有碰撞到的div  则回到原点
+				
+				$(dom).stop().animate({
+					
+					left:sleft + 'px',
+					
+					top:stop + 'px'
+					
+				},5e2)
+				
+			}else{
+				
+				//交换位置
+				$(dom).stop().animate({
+					
+					left:coll.dom2left,
+					
+					top:coll.dom2top
+					
+				})
+				
+				coll.dom.stop().animate({
+					
+					left:sleft,
+					
+					top:stop
+					
+				},5e2)
+				
+			}
+			
+			dom = "";
+			
+		})
+	}
+	//判断两个div相碰撞没
+	function judgeCollision(dom1,dom2){     //dom1移动的div   dom2固定的div
+		
+		var a = {
+			
+			iscoll:false,    //是否发生了碰撞
+			
+			area:0,    //碰撞的面积
+			
+			dom:dom2,     //碰撞的节点
+			
+			dom2left: dom2.css('left').replace('px',''),    //dom2的x坐标
+			
+			dom2top: dom2.css('top').replace('px',''),     //dom2的y坐标
+			
+			index1:dom1.attr('data-index'),    //dom1的index
+			
+			index2:dom2.attr('data-index'),    //dom2的index
+			
+		}
+		
+		var dom1left = dom1.css('left').replace('px',''),    //dom1 的x  坐标
+		
+		dom1top = dom1.css('top').replace('px',''),    //dom1的y坐标
+		
+		dom2left = dom2.css('left').replace('px',''),   //dom2的x坐标
+		
+		dom2top = dom2.css('top').replace('px',''),    //dom2的y坐标
+		
+		maxleft = parseFloat(dom2left) + parseFloat(dom1.width()) + parseFloat(dom2.width()),   //两div会发生碰撞的最x大坐标
+		
+		minleft = parseFloat(dom2left) - parseFloat(dom1.width()),   //两div会发生碰撞的最小x坐标
+		
+		maxtop = parseFloat(dom2top) + parseFloat(dom1.height()) + parseFloat(dom2.height()),    //两div会发生碰撞的最大y坐标
+		
+		mintop = parseFloat(dom2top) - parseFloat(dom1.height());    //两div会发生碰撞的最小y坐标
+		
+		if(dom1left > minleft && dom1left < maxleft && dom1top > mintop && dom1top < maxtop){
+			
+			a.iscoll = true;
+			
+			var w = parseFloat(dom2left) > parseFloat(dom1left) ? parseFloat(dom2left) - parseFloat(dom1left) : parseFloat(dom1left) - parseFloat(dom2left),
+			
+			h = parseFloat(dom2top) > parseFloat(dom1top) ? parseFloat(dom2top) - parseFloat(dom1top) : parseFloat(dom1top) - parseFloat(dom2top);
+			
+			//计算碰撞的面积
+			a.area = (parseFloat(dom2.width()) - w) * (parseFloat(dom2.height()) - h);
+			
+		}
+		
+		return a;
+		
+	}
+	
+	//判断div碰撞的数量   并选出面积最大的那一个
+	function judgenum(arr){
+		
+		var a = {}, len = 0;
+		
+		for(var i = 0 ; i < arr.length ; i++){
+			
+			if(arr[i].iscoll){
+				
+				len++ 
+				
+				if((a.area && a.area < arr[i].area) || ( !a.area ) ){
+					
+					a = arr[i];
+					
+				}
+				
+			}
+			
+		}
+		
+		a.len = len;  //发生碰撞的个数
+		
+		return a;
+		
+	}
+	
+	//根据data-index获取index下标
+// 	function getindex(){
+// 		
+// 		var a = "";
+// 		
+// 		for(var i = 0 ; i < $('.page').children('div').length ; i++){
+// 			
+// 			a += $('.page').children('div').eq(i).attr('data-index');
+// 			
+// 		}
+// 		
+// 		console.log(a)
+// 		
+// 		if(a == '10987654321'){
+// 			
+// 			alert('恭喜您拼图成功！');
+// 			
+// 		}
+// 	}
+	
+</script>

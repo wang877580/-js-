@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>对js的研究</title>
+	</head>
+	<body>
+		<div></div>
+	</body>
+	<script>
+		
+		function request(obj){
+			if(!obj.url){
+				return console.log("请求路径不能为空！")
+			}
+			obj.method = obj.method ? obj.method.toUpperCase() : "POST";
+			if(obj.data && obj.method && obj.method == "GET"){
+				var i = 0;
+				for(k in obj.data){
+					obj.url += ( i == 0 ? "?" : "&" ) + k + "=" + obj.data[k];
+					i++
+				}
+			}
+			var xhr;
+			if(window.XMLHttpRequest){
+				xhr = new XMLHttpRequest();
+			}else{   //兼容ie5，ie6
+				xhr = new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			if(xhr){
+				//监听请求状态的变化
+				xhr.onreadystatechange = state_Change;
+				//初始化一个请求
+				//xhr.open 5个参数
+				//第一个参数  method 请求方式 常用的请求方式有4种 「GET」、「POST」、「PUT」、「DELETE」
+				//第二个参数  url 请求的路径
+				//第三个参数  async表示要不要执行异步操作
+				//第四个参数  user 可选的用户名用于认证用途
+				//第五个参数  password 可选的密码用于认证用途
+				xhr.open(obj.method, obj.url, obj.async || true, obj.uer || null , obj.password || null);
+				//设置超时时间  单位毫秒
+				xhr.timeout = obj.timeout || 0;
+				//设置请求头
+				xhr.setRequestHeader("Content-type", obj.header ? (obj.header['Content-type'] || "application/x-www-form-urlencoded" ) : "application/x-www-form-urlencoded" );
+				//发送http请求  如果是异步请求则方法会在发送请求后立即返回 ，如果是同步请求，则此方法直到响应到达后才会返回。
+				xhr.send(obj.method && obj.method == "GET" ? null : obj.data ? obj.data : null);
+				
+				function state_Change(){
+					if(xhr.readyState == 4){  //请求完成
+						console.log(xhr);
+						if(obj.upload && obj.upload == "function"){  //监听上传的状态   如果需要做进度条的话需要这一步
+							obj.upload(xhr.upload);
+						}
+						if(xhr.status == '200'){  //请求成功
+							if(obj.success && typeof obj.success == "function" ){
+								obj.success(xhr.responseText);
+							}
+						}else{   //请求失败
+							if(obj.error && typeof obj.error == "function" ){
+								obj.error(xhr.responseText);
+							}
+						}
+						if(obj.complate && typeof obj.complate == "function"){  //请求完成
+							obj.complate(xhr.responseText);
+						}
+					}
+				}
+			}else{
+				return console.log("您的浏览器不支持xmlhttp");
+			}
+		}
+		
+		request({
+			method:'get',
+			url:'www.baidu.com',
+			data:{
+				a:"123",
+				b:'456'
+			},
+			success:function(res){
+				console.log(res);
+			},error:function(res){
+				console.log(res);
+			}
+		})
+		
+	</script>
+</html>

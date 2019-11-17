@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<script src="js/axios.js"></script>
+		<title>axios的配置</title>
+		<style type="text/css">
+
+		</style>
+	</head>
+	<body>
+	</body>
+	<script>
+		
+		//axios的封装1
+		function request1(url,method,data,callbank,error){
+			method = method.toLowerCase();
+			if(typeof axios[method] != 'function'){
+				return console.log("请传入正确的值！！！！");
+			}else{
+				axios[method](url,{
+					params:data
+				}).then(function(res){
+					if( callbank && typeof callbank == "function"){
+						return callbank(res);
+					}
+				}).catch(function(err){
+					if(error && typeof error == "function"){
+						return error(err)
+					}
+				})
+			}
+		}
+		
+		
+		//axios的封装2
+		function request2(url,method,data,callbank,error,responseType,header){
+			data?data.token = sessionStorage.getItem('token')?"":sessionStorage.getItem('token'):"";
+			method = method.toLowerCase();
+			console.log(data);
+			if(typeof axios[method] != 'function'){
+				//throw new Error('The request is not in the right way.');
+				//return console.log('%c Requests are not supported in a way that only post and get requests are supported','font-size:40px;color:red;');
+				return setConsole('请求方式只支持post或者get！！！！',10);
+			}
+			var obj = {
+				method: method,   //请求方式
+			    url: url,   //请求路径
+			    data:data,  //请求的数据
+			    responseType:responseType?responseType:'json',  //指定返回的数据格式默认为json
+			}
+			header?obj.headers=header:"";
+			axios(obj).then(function(res){
+				if(callbank && typeof callbank == "function"){
+					return callbank(res);
+				}
+			}).catch(function(res){
+				if(error && typeof error == "function"){
+					return error(res);
+				}
+			})
+		}
+		
+		request2('https://www.baidu.com','get123',{});
+		
+		setConsole("效果怎么样？",200);
+		
+		//超级炫酷的console.log
+		function setConsole(text,size){
+			size = size ? Number(size) ? Number(size) : 10 : 10;   //字体大小  默认为10px
+			var msg = "'";
+			for(var i = 0 ; i < text.length ; i++){
+				if(i == text.length - 1){
+					msg += "%c"+text[i] + "'";
+				}else{
+					msg += "%c"+text[i];
+				}
+			}
+			for(var k = 0 ; k < text.length ; k++){
+				msg += ",'font-size:"+size+"px;color:rgb("+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+");'"
+			}
+			eval("console.log(" + msg + ")");
+		}
+		
+	</script>
+</html>
