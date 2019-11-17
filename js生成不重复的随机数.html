@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+	</body>
+	<script>
+	window.addEventListener('load',function(){
+		var a = 155987896;
+		var ff = setRandom(a,999,[]);
+	},false)
+	
+	//生成min个不重复的随机数
+	function setRandom(len,min,arr){   //随机生成 min个小于len的不重复的数组 arr传个空数组就行了
+		//当min的数字越大  超过最大调用堆栈大小的概率就越大
+		//测试极限差不多是8400
+		//8000以上概率很大
+		//所以这方法还是有bug的
+		//当然如果只是生成几十个或者几百个随机数问题还是不大的 （理论上来说还是有概率  至今没有测试出来）
+		if(len >= min){
+			var num =  Math.floor(Math.random()*len);
+			for(var i = 0 , j = 0 ; i < arr.length ; i++){
+				if(num == arr[i]){ j++ };
+			}
+			if(j == 0){ arr.push(num) };
+			if(arr.length < min){ return setRandom(len,min,arr) }else{ return arr };
+		}else{ return false };
+	}
+	
+	</script>
+</html>
