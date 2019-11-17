@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<input type="" id="money" value="" />
+	</body>
+	<script>
+		
+		//监听页面加载完成
+		window.addEventListener("load",function(){
+			//监听input的输入事件
+			document.getElementById('money').addEventListener('input',function(){
+				this.value = this.value.replace(/[^\d^\.]+/g, "")
+            	if (this.value) {
+            		var rt = [],num,tail;
+            		if(this.value.indexOf('.')>0){
+            			num = this.value.slice(0,this.value.indexOf('.'));
+            			tail =this.value.slice(this.value.indexOf('.'));
+            		}else{
+            			num = this.value.replace(/[^\d^\.]+/g, "");
+            			tail = '';
+            		}
+            		if(num.length>3){
+            			var mod = num.length%3;
+            			val = (mod == 0 ? '' : (num.substring(0, mod)));
+            			for(var i = 0 ; i < Math.floor(num.length / 3); i++){
+            				if ((mod == 0) && (i == 0)){
+            					 val += num.substring(mod + 3 * i, mod + 3 * i + 3);
+            				}else{
+            					val += ',' + num.substring(mod + 3 * i, mod + 3 * i + 3);
+            				}
+            	                
+                		}
+            			val += tail;
+            		}else{
+            			val = this.value;
+            		}
+            		this.value = val;
+            	}
+			})
+		},false)
+		
+	</script>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			body{
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.button{
+				width: 400px;
+				line-height: 80px;
+				color: #FFFFFF;
+				background: greenyellow;
+				border-radius: 60px;
+				text-align: center;
+				font-size: 40px;
+				cursor: pointer;
+			}
+			.button:active{
+				position: relative;
+				top: -1px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="button">点击我</div>
+	</body>
+	<script>
+		
+		//监听对象变化    兼容ie9  版权归王云龙所有
+		function watch(obj,fn){	
+			//判断是不是对象  如果不是对象则返回
+			if(!obj || typeof obj != 'object'){ return false; };
+			//申明一个对象
+			var CLONEOBJ = new Object();
+			//监听数据的变化
+			for( k in obj){
+				(function(a){
+					//克隆obj里面的值  防止有些数据没变化丢失掉
+					CLONEOBJ[a] = obj[a];   
+					Object.defineProperty(obj, k ,{
+		   				get:function(){
+		   					return CLONEOBJ[a];
+		   				},
+		   				//监听数据的变化
+		   				set:function(val){
+		   					//优化性能 防止陷入死循环
+		   					if(CLONEOBJ[a] == val){ return; }
+		   					CLONEOBJ[a] = val;
+		   					if(typeof fn == "function"){ return fn(obj); };
+		   				},
+		   			})
+				})(k)
+			}
+		}
+		
+		
+		//调用方法
+		var a = {
+			name:'123',
+			age:'26',
+			phone:'110',
+			num:1
+		}
+		
+		//监听数据变化
+		watch(a,function(obj){
+			console.log(obj);
+			alert("监听到数据变化了！！！")
+		})
+		
+		document.getElementsByClassName('button')[0].addEventListener('click',function(){
+			
+			a.num += 1;
+			
+		},false)
+		
+	</script>
+</html>
